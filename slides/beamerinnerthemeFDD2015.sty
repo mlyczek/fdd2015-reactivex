@@ -1,0 +1,27 @@
+\mode<presentation>
+
+\RequirePackage{tikz}
+\RequirePackage{textpos}
+
+\usebackgroundtemplate{
+    \includegraphics[width=\paperwidth,height=\paperheight]{imagesFDD2015/normal-bg.jpg}
+}
+
+\setbeamertemplate{title page}{
+    \begin{tikzpicture}[remember picture, overlay]
+        \node[xshift=0cm,yshift=0cm] at (current page.center) {
+            \includegraphics[width=\paperwidth,height=\paperheight]{imagesFDD2015/title-bg.jpg}
+        };
+    \end{tikzpicture}
+
+    \begin{textblock*}{5cm}(-0.4cm, 4.1cm)
+        \usebeamerfont{author}\insertauthor%
+    \end{textblock*}
+
+    \begin{textblock*}{8cm}(-0.4cm, 4.7cm)
+        \usebeamerfont{title}\inserttitle%
+    \end{textblock*}
+}
+
+
+\mode<all>
