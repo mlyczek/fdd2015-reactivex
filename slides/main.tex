@@ -1,7 +1,10 @@
-\documentclass[24pt]{beamer}
+\documentclass[24pt,handout]{beamer}
 
 \usepackage{polski}
 \usepackage[utf8]{inputenc}
+
+\usepackage{listings}
+\usepackage{color}
 
 \title[ReactiveX]{ReactiveX - okiełznać asynchroniczność}
 \date{Gliwice 2.X.2015}
@@ -9,16 +12,272 @@
 
 \usetheme{FDD2015}
 
+\lstdefinestyle{mystyle}{
+    basicstyle=\footnotesize
+}
+\lstset{style=mystyle}
+
+\tikzset{event/.style={circle,draw=FDDOrange,fill=FDDOrange!40,thick,inner sep=0pt,minimum size=6mm},
+         error/.style={draw=red,line width=2pt},
+         termination/.style={line width=2pt}}
+
+%\setbeameroption{show notes}
+
 \begin{document}
-    \begin{frame}[plain]
-        \titlepage
-    \end{frame}
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
 
-    \section{Wstęp}
+\section{Wstęp}
 
-    \begin{frame}
-        \frametitle{Tytuł strony}
-    \end{frame}
+\begin{frame}
+    \begin{columns}
+        \begin{column}{.5\textwidth}
+            \begin{center}
+                \includegraphics[height=.6\textheight]{images/multitasking.jpg}
+            \end{center}
+        \end{column}
+        \begin{column}{.5\textwidth}
+            \begin{center}
+                \includegraphics<2>[width=.6\textwidth]{images/chip.pdf}
+            \end{center}
+        \end{column}
+    \end{columns}
 
-    \endpage
+    \note<2>[item]{Dzisiejsze aplikacje są asynchroniczne}
+    \note<2>[item]{Pobieramy dane z~wielu źródeł}
+    \note<2>[item]{Reagujemy na push message z~serwera}
+    \note<2>[item]{Reagujemy na działanie użytkownika}
+    \note<2>[item]{Mamy wielordzeniowe komputery}
+    \note<2>[item]{Programy coraz bardziej współbieżne}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Problemy z~asynchronicznością}
+
+    \begin{columns}
+        \begin{column}{.5\textwidth}
+            \begin{itemize}
+                \item<1-> Różne API w~każdym języku
+                \begin{itemize}
+                    \item<1-> \texttt{Thread} w~Javie
+                    \item<1-> \texttt{async/await} w~.NET
+                    \item<1-> callbacks, \texttt{Promise} w~JavaScript
+                    \item<1-> \dots
+                \end{itemize}
+                \item<2-> Ciężka obsługa błędów (\texttt{try/catch}?)
+                \item<3-> Callback hell
+                \item<4-> Zdarzenia?
+                \item<5-> Kompozycja?
+            \end{itemize}
+        \end{column}
+
+        \begin{column}{.5\textwidth}
+            \includegraphics<3->[width=\textwidth]{images/callback_hell.jpg}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\section{ReactiveX}
+
+\begin{frame}
+    \begin{center}
+        {\Huge \raisebox{-.2\height}{\includegraphics[height=0.1\paperheight]{images/Rx_Logo_M.png}} ReactiveX}
+
+        \vspace{20pt}
+
+        {\Large An API for asynchronous programming with~\alert<2>{observable streams}}
+
+        \vspace{20pt}
+
+        ReactiveX is a combination of the best ideas from the Observer pattern, the Iterator pattern and functional programming
+    \end{center}
+
+    \note<2>{Chcę opowiedzieć o~ReactiveX i~o~tym jak może nam z~tymi problemami pomóc.
+
+    Twórcy opisują ReactiveX jako API do asynchronicznego programowania przy użyciu obserwowalnych strumieni. I~to właśnie te obserwowalne
+    strumienie są centrum ReactiveX.}
+\end{frame}
+
+\subsection{Observable streams}
+
+\begin{frame}[fragile]
+    \frametitle{Observable streams}
+
+    \begin{center}
+        \begin{tikzpicture}
+            \draw[->,line width=2pt] (0,0) -- (10,0);
+
+            \node[event] at (1,0) {A};
+            \node[event] at (2,0) {B};
+            \node[event] at (5,0) {C};
+
+            \draw[error] (6.8,0.2) -- (7.2,-0.2);
+            \draw[error] (7.2,0.2) -- (6.8,-0.2);
+
+            \draw[termination] (9,0.2) -- (9,-0.2);
+        \end{tikzpicture}
+    \end{center}
+
+    \vspace{20pt}
+
+    \begin{center}
+        \def\arraystretch{1.8}
+        \begin{tabular}{cl}
+            \tikz[baseline=-0.7ex]{\node[event] at (0,0){}} & element strumienia \\
+
+            \tikz[x=1.2ex,y=1.2ex,baseline=-0.7ex]{\draw[error] (0,1) -- (1.6,-1) (0,-1) -- (1.6,1);} & błąd \\
+
+            \tikz[x=1.2ex,y=1.2ex,baseline=-0.7ex]{\draw[termination] (0,1) -- (0,-1)} & koniec strumienia
+        \end{tabular}
+    \end{center}
+
+    \note{No dobra, ale to przecież nic nowego! Mamy event busy, czy zwykłe eventy użytkownika (klikanie myszki, itp.),
+    na które możemy nasłuchiwać i~reagować na nie.}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Co może być elementem strumienia?}
+
+    \pause
+
+    \begin{center}
+        {\Huge wszystko}
+    \end{center}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Co może być elementem strumienia?}
+
+    \begin{itemize}
+        \item zdarzenia użytkownika (np. klikanie myszki)
+        \item \texttt{String}
+        \item odpowiedź serwera na zapytanie HTTP
+        \item tweet
+        \item pojedynczy wiersz wyniku zapytania SQL
+        \item \dots
+    \end{itemize}
+
+    \note{No ale obserwowanie takiego strumienia to przecież zwykły wzorzec obserwatora!}
+\end{frame}
+
+\subsection{Stream operators}
+
+\begin{frame}
+    \frametitle{Łączenie strumieni}
+
+    \begin{center}
+        \begin{tikzpicture}
+            \draw[->,line width=2pt] (0,5) -- (10,5);
+
+            \node[event] at (1,5) {A};
+            \node[event] at (4,5) {B};
+            \node[event] at (7,5) {C};
+            \node[event] at (8,5) {D};
+
+            \draw[->,line width=2pt] (0,3) -- (10,3);
+
+            \node[event] at (2,3) {1};
+            \node[event] at (3,3) {2};
+            \node[event] at (5,3) {3};
+            \node[event] at (6,3) {4};
+
+            \draw (0,1) -- (10,1) -- (10,2) -- (0,2) -- (0,1);
+            \node at (5,1.5) {ZIP};
+
+            \draw[->,line width=2pt] (0,0) -- (10,0);
+
+            \node[event] at (2,0) {1A};
+            \node[event] at (4,0) {2B};
+            \node[event] at (7,0) {3C};
+            \node[event] at (8,0) {4D};
+        \end{tikzpicture}
+    \end{center}
+
+    \note{Tutaj tkwi dalsza część siły ReactiveX.
+
+    Observable (strumienie) są w~ReactiveX first classc itizen, bo można je łączyć, tworzyć nowe, przekazywać jako parametry itp.}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Operatory}
+
+    \begin{center}
+        \def\arraystretch{1.8}
+        \begin{tabular}{cccc}
+            \texttt{From} &~\texttt{Join} &~\texttt{Range} & \texttt{Interval} \\
+            \texttt{Just} &~\texttt{FlatMap} &~\texttt{GroupBy} & \texttt{Map} \\
+            \texttt{Scan} &~\texttt{Window} &~\texttt{Debounce} & \texttt{Distinct} \\
+            \texttt{ElementAt} &~\texttt{Filter} &~\texttt{First} & \texttt{Last} \\
+            \texttt{Sample} &~\texttt{Skip} &~\texttt{SkipLast} & \texttt{Take} \\
+            \texttt{TakeLast} &~\texttt{And} &~\texttt{CombineLatest} & \texttt{Join} \\
+            \texttt{Merge} &~\texttt{Switch} &~\texttt{Zip} & \texttt{Retry}
+        \end{tabular}
+
+        \vspace{2ex}
+
+        \dots
+    \end{center}
+
+    \note{Każda implementacja ReactiveX w~konkretnym języku programownia ma jeszcze swoje operatory specyficzne dla danego języka}
+\end{frame}
+
+\subsection{Summary}
+
+\begin{frame}
+    \frametitle{Tylko Java i~JavaScript?}
+
+    \begin{columns}
+        \begin{column}{.5\textwidth}
+            \begin{itemize}
+                \item Java
+                \item JavaScript
+                \item C\#
+                \item Scala
+                \item Clojure
+                \item C++
+            \end{itemize}
+        \end{column}
+        \begin{column}{.5\textwidth}
+            \begin{itemize}
+                \item Ruby
+                \item Python
+                \item Groovy
+                \item JRuby
+                \item Kotlin
+                \item Swift
+            \end{itemize}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Co dalej?}
+
+    \begin{block}{\url{http://reactivex.io}}
+        Główne źródło wiedzy na temat ReactiveX wraz z~linkami do dokumentacji dla wszystkich implementacji w~różnych językach
+    \end{block}
+
+    \begin{block}{\url{https://gist.github.com/staltz/868e7e9bc2a7b8c1f754}}
+        ``The introduction to Reactive Programming you've been missing''
+    \end{block}
+
+    \begin{block}{\url{https://github.com/mlyczek/fdd2015-reactivex}}
+        Slajdy z~tej prezentacji oraz ich kod (\LaTeX)
+    \end{block}
+
+\end{frame}
+
+\begin{frame}
+    \frametitle{Co dalej?}
+    \includegraphics[width=\textwidth]{images/coding.jpg}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        \Huge ?
+    \end{center}
+\end{frame}
+
+\endpage
 \end{document}
