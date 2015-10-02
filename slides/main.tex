@@ -1,10 +1,7 @@
-\documentclass[24pt,handout]{beamer}
+\documentclass[24pt]{beamer}
 
 \usepackage{polski}
 \usepackage[utf8]{inputenc}
-
-\usepackage{listings}
-\usepackage{color}
 
 \title[ReactiveX]{ReactiveX - okiełznać asynchroniczność}
 \date{Gliwice 2.X.2015}
@@ -12,16 +9,9 @@
 
 \usetheme{FDD2015}
 
-\lstdefinestyle{mystyle}{
-    basicstyle=\footnotesize
-}
-\lstset{style=mystyle}
-
 \tikzset{event/.style={circle,draw=FDDOrange,fill=FDDOrange!40,thick,inner sep=0pt,minimum size=6mm},
          error/.style={draw=red,line width=2pt},
          termination/.style={line width=2pt}}
-
-%\setbeameroption{show notes}
 
 \begin{document}
 \begin{frame}[plain]
@@ -43,13 +33,6 @@
             \end{center}
         \end{column}
     \end{columns}
-
-    \note<2>[item]{Dzisiejsze aplikacje są asynchroniczne}
-    \note<2>[item]{Pobieramy dane z~wielu źródeł}
-    \note<2>[item]{Reagujemy na push message z~serwera}
-    \note<2>[item]{Reagujemy na działanie użytkownika}
-    \note<2>[item]{Mamy wielordzeniowe komputery}
-    \note<2>[item]{Programy coraz bardziej współbieżne}
 \end{frame}
 
 \begin{frame}
@@ -92,11 +75,6 @@
 
         ReactiveX is a combination of the best ideas from the Observer pattern, the Iterator pattern and functional programming
     \end{center}
-
-    \note<2>{Chcę opowiedzieć o~ReactiveX i~o~tym jak może nam z~tymi problemami pomóc.
-
-    Twórcy opisują ReactiveX jako API do asynchronicznego programowania przy użyciu obserwowalnych strumieni. I~to właśnie te obserwowalne
-    strumienie są centrum ReactiveX.}
 \end{frame}
 
 \subsection{Observable streams}
@@ -131,9 +109,6 @@
             \tikz[x=1.2ex,y=1.2ex,baseline=-0.7ex]{\draw[termination] (0,1) -- (0,-1)} & koniec strumienia
         \end{tabular}
     \end{center}
-
-    \note{No dobra, ale to przecież nic nowego! Mamy event busy, czy zwykłe eventy użytkownika (klikanie myszki, itp.),
-    na które możemy nasłuchiwać i~reagować na nie.}
 \end{frame}
 
 \begin{frame}
@@ -157,8 +132,6 @@
         \item pojedynczy wiersz wyniku zapytania SQL
         \item \dots
     \end{itemize}
-
-    \note{No ale obserwowanie takiego strumienia to przecież zwykły wzorzec obserwatora!}
 \end{frame}
 
 \subsection{Stream operators}
@@ -193,10 +166,6 @@
             \node[event] at (8,0) {4D};
         \end{tikzpicture}
     \end{center}
-
-    \note{Tutaj tkwi dalsza część siły ReactiveX.
-
-    Observable (strumienie) są w~ReactiveX first classc itizen, bo można je łączyć, tworzyć nowe, przekazywać jako parametry itp.}
 \end{frame}
 
 \begin{frame}
@@ -218,8 +187,6 @@
 
         \dots
     \end{center}
-
-    \note{Każda implementacja ReactiveX w~konkretnym języku programownia ma jeszcze swoje operatory specyficzne dla danego języka}
 \end{frame}
 
 \subsection{Summary}
@@ -256,6 +223,10 @@
 
     \begin{block}{\url{http://reactivex.io}}
         Główne źródło wiedzy na temat ReactiveX wraz z~linkami do dokumentacji dla wszystkich implementacji w~różnych językach
+    \end{block}
+
+    \begin{block}{\url{http://rxmarbles.com/}}
+        Interaktywne diagramy operatorów
     \end{block}
 
     \begin{block}{\url{https://gist.github.com/staltz/868e7e9bc2a7b8c1f754}}
