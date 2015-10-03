@@ -29,10 +29,13 @@ public class Main {
         Spark.staticFileLocation("static/");
 
         Spark.get("/users/:username/position", (request, response) -> {
+            // simulate some processing
             Thread.sleep(300);
             return String.format("Position of %s", request.params(":username"));
         });
+
         Spark.get("/users/:username/fullname", (request, response) -> {
+            // simulate some processing
             Thread.sleep(500);
             return String.format("Full %s name", request.params(":username"));
         });
@@ -53,16 +56,23 @@ public class Main {
         }, gson::toJson);
     }
 
+    /**
+     * Creates observable emitting {@link User} instances with full information.
+     * @param webService web service to invoke requests on
+     * @param username username of user to retrieve full information
+     * @return {@link User} with full name and position
+     */
     private static Observable<User> getUserObservable(WebService webService, String username) {
         Observable<String> fullnameObservable = webService
                 .getUserFullName(username)
                 .subscribeOn(Schedulers.io());
 
-        Observable<String> position = webService
+        Observable<String> positionObservable = webService
                 .getUserPosition(username)
                 .subscribeOn(Schedulers.io());
 
-        return fullnameObservable.zipWith(position,
+        // zip two observables into third one emitting combined items
+        return fullnameObservable.zipWith(positionObservable,
                 (fullname, userPosition) ->
                     new User(username, fullname, userPosition));
     }

@@ -9,14 +9,13 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
+/**
+ * Converter factory to allow returning {@link String} instances from Retrofit handler methods.
+ */
 public class StringConverterFactory extends Converter.Factory {
     @Override
     public Converter<ResponseBody, ?> fromResponseBody(Type type, Annotation[] annotations) {
-        return new Converter<ResponseBody, String>() {
-            @Override public String convert(ResponseBody value) throws IOException {
-                return value.string();
-            }
-        };
+        return ResponseBody::string;
     }
 
     @Override public Converter<?, RequestBody> toRequestBody(Type type, Annotation[] annotations) {
